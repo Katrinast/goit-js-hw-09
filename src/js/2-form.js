@@ -3,43 +3,40 @@ const formData = {
   message: '',
 };
 
-const form = document.querySelector('.feedback-form');
-
-const formDataFromLocalStorage = () => {
-  const savedData = localStorage.getItem('feedback-form-state');
-  if (savedData) {
-    const parsedData = JSON.parse(savedData);
-    formData.email = parsedData.email;
-    formData.message = parsedData.message;
-    const { email, message } = form.elements;
-    email.value = formData.email;
-    message.value = formData.message;
-  }
+const formRefs = {
+  form: document.querySelector('.feedback-form'),
+  email: document.querySelector('.form-input'),
+  message: document.querySelector('.form-textarea'),
 };
 
-formDataFromLocalStorage();
+const { form, email, message } = formRefs;
+const localStorageKey = "feedback-form-state";
+const savedDataLocal = JSON.parse(localStorage.getItem(localStorageKey));
 
-form.addEventListener('input', ({ target }) => {
-  const { name, value } = target;
-  formData[name] = value;
-  localStorage.setItem('feedback-form-state', JSON.stringify(formData));
-});
+if (savedDataLocal !== null) {
+  email.value = savedDataLocal.email;
+  message.value = savedDataLocal.message;
+}
 
-const isFormValid = () => {
-  const { email, message } = formData;
-  return email.trim() !== '' && message.trim() !== '';
-};
-
-form.addEventListener('submit', event => {
+function onformSubmit(event) {
   event.preventDefault();
-
-  if (!isFormValid()) {
-    alert('Fill please all fields');
-    return;
-  }
-
+ if ( email.value === "" || message.value === "") {
+       alert("Fill please all fields");
+       return; 
+    }
   console.log(formData);
-
-  localStorage.removeItem('feedback-form-state');
+  localStorage.removeItem(localStorageKey);
   form.reset();
-});
+}
+
+form.addEventListener('submit', onformSubmit);
+
+function onFormInput(event) {
+  formData.email = email.value.trim();
+  formData.message = message.value.trim();
+  localStorage.setItem(localStorageKey, JSON.stringify(formData));
+}
+
+form.addEventListener('input', onFormInput);
+
+
